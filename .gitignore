@@ -26,3 +26,8 @@
 *.exe
 *.out
 *.app
+
+# Прочие файлы среды Visual Studio
+*.sdf
+*.opensdf
+*.ipch
