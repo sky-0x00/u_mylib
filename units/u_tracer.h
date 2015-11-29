@@ -50,6 +50,7 @@ private:
 	} trace_to;
 
 	trace::info_t info;
+	inline bool is_trace_needed();
 };
 
 class tracer_t::config_t

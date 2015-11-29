@@ -8,8 +8,8 @@
 int main()
 {
 	tracer_t::config_t config;
-	config.trace_to.debug_output = true;
-	config.trace_to.file_name = L"c:\\output.log";
+	//config.trace_to.debug_output = true;
+	//config.trace_to.file_name = L"c:\\output.log";
 	config.info.id_format = trace::info_t::id_format_t::hex_dec;
 	
 	tracer_t tracer(config);

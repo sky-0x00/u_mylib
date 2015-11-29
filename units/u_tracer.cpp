@@ -90,6 +90,9 @@ size_t tracer_t::create_prefix(wchar_t *buffer_data, size_t buffer_size)
 
 size_t tracer_t::trace(trace::category category, const wchar_t* format, ...)
 {
+	if (!is_trace_needed())
+		return 0;
+
 	const size_t buffer_size = buffer.size();
 	wchar_t *const buffer_data = buffer.data();
 
@@ -120,6 +123,11 @@ size_t tracer_t::trace(trace::category category, const wchar_t* format, ...)
 		trace_to.file_stream << buffer_data;
 
 	return result;
+}
+
+inline bool tracer_t::is_trace_needed()
+{
+	return trace_to.debug_output || trace_to.file_stream.is_open();
 }
 
 tracer_t::config_t::config_t(size_t buffer_size) :
