@@ -71,16 +71,18 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)..\out\debug_x32\</OutDir>
-    <IntDir>$(OutDir)temp\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)out\debug_x32\</OutDir>
+    <IntDir>$(OutDir)$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)out\debug_x64\</OutDir>
+    <IntDir>$(OutDir)$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)..\out\release_x32\</OutDir>
-    <IntDir>$(OutDir)temp\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)out\release_x32\</OutDir>
+    <IntDir>$(OutDir)$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -96,8 +98,11 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)..\..\..\symbols\debug_x32\$(TargetName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)..\..\symbols\debug_x32\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
+    <PostBuildEvent>
+      <Command>if exist "$(TargetDir)$(TargetName).ilk" move "$(TargetDir)$(TargetName).ilk" "$(IntermediateOutputPath)$(TargetName).ilk"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -109,7 +114,11 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)..\..\symbols\debug_x64\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
+    <PostBuildEvent>
+      <Command>if exist "$(TargetDir)$(TargetName).ilk" move "$(TargetDir)$(TargetName).ilk" "$(IntermediateOutputPath)$(TargetName).ilk"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -126,8 +135,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ProgramDatabaseFile>$(OutDir)..\..\..\symbols\release_x32\$(TargetName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)..\..\symbols\release_x32\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
+    <PostBuildEvent>
+      <Command>if exist "$(TargetDir)$(TargetName).ilk" move "$(TargetDir)$(TargetName).ilk" "$(IntermediateOutputPath)$(TargetName).ilk"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -143,21 +155,32 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <ProgramDatabaseFile>$(OutDir)..\..\symbols\release_x64\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
+    <PostBuildEvent>
+      <Command>if exist "$(TargetDir)$(TargetName).ilk" move "$(TargetDir)$(TargetName).ilk" "$(IntermediateOutputPath)$(TargetName).ilk"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\units\ui\u_structs.h" />
     <ClInclude Include="..\..\units\u_convert.h" />
+    <ClInclude Include="..\..\units\u_exception.h" />
+    <ClInclude Include="..\..\units\u_process.h" />
     <ClInclude Include="..\..\units\u_string.h" />
     <ClInclude Include="..\..\units\u_system.h" />
-    <ClInclude Include="..\..\units\u_tracer.h" />
+    <ClInclude Include="..\..\units\u_trace.h" />
+    <ClInclude Include="..\..\units\winapi\u_types.h" />
     <ClInclude Include="..\..\units\winapi\u_winapi.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\units\ui\u_structs.cpp" />
     <ClCompile Include="..\..\units\u_convert.cpp" />
+    <ClCompile Include="..\..\units\u_exception.cpp" />
+    <ClCompile Include="..\..\units\u_process.cpp" />
     <ClCompile Include="..\..\units\u_string.cpp" />
-    <ClCompile Include="..\..\units\u_tracer.cpp" />
+    <ClCompile Include="..\..\units\u_trace.cpp" />
     <ClCompile Include="..\..\units\winapi\u_winapi.cpp" />
     <ClCompile Include="p_tracer.cpp" />
     <ClCompile Include="stdafx.cpp">

@@ -7,12 +7,15 @@
 //#include <u_macros.h>
 #include <string>
 
-#define _in
-#define _out
+#define arg_in
+#define arg_out
+#define arg_option
 
 //#ifdef _MSC_VER
 //#define inline __inline
 //#endif
+
+#define UNSUPPORTED_PLATFORM	Ќеподдерживаема€ платформа
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef unsigned char     uint08, byte_t;
@@ -30,18 +33,8 @@ typedef float		real_s;
 typedef double		real_d;
 typedef long double real_e;
 
-typedef std::wstring string_t;
-
-typedef wchar_t  char_t;
-typedef wchar_t* chars_t;
-typedef const wchar_t* const_chars_t;		// ибо typeid(wchar_t *const) == typeid(const chars_t)
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//#ifdef S_OK
-//#undef S_OK
-//#endif
 
-//#define S_OK			0		// все хорошо (так и должно быть)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //#define sign(x)   ((x) < 0 ? -1 : ((x) > 0 ? 1 : 0))
@@ -56,87 +49,136 @@ typedef const wchar_t* const_chars_t;		// ибо typeid(wchar_t *const) == typeid(c
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef min
-#undef min
+	#undef min
 #endif
 
 #ifdef max
-#undef max
+	#undef max
 #endif
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef __cplusplus
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// минимум из двух чисел
-	template <typename type> type min(const type &a, const type & b) {
+	template <typename type_t> type_t min(
+		arg_in const type_t &a, 
+		arg_in const type_t &b
+	) {
 		return (a < b) ? a : b;
 	}
 	// максимум из двух чисел
-	template <typename type> type max(const type &a, const type &b) {
+	template <typename type_t> type_t max(
+		arg_in const type_t &a, 
+		arg_in const type_t &b
+	) {
 		return (a > b) ? a : b;
 	}
 
-	// проверка числа x на вхождение в диапазон [a, b]
-	template <typename type> bool in_range(const type &x, const type &a, const type &b) {
-		return (x >= a) && (x <= b);
+	// проверка числа value на вхождение в диапазон [from, to]
+	template <typename type_t> bool in_range(
+		arg_in const type_t &value, 
+		arg_in const type_t &from, 
+		arg_in const type_t &to
+	) {
+		return (value >= from) && (value <= to);
 	}
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// обмен значени€ми двух переменных произвольного типа - нет альтернативы дл€ €зыка C
-	template <typename type> void exchange(_in _out type &a, _in _out type &b) {
-		type buf = a;
-		a = b;
-		b = buf;
-	}
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// сравнение двух объектов, вывод -1, если (a < b), 1, если (a > b), 0 если (a = b)
-	template <typename type> char compare(_in const type &a, _in const type &b) {
-		if (a < b)
-			return -1;
-		if (a > b)
-			return 1;
-		return 0;
-	}
-
-	// возвращает знак числа: -1 дл€ отриц., 1 дл€ положит. и 0 дл€ нул€
-	template <typename type> char sign(_in const type &x) {
-		return compare<type>(x, static_cast<const type&>(0))
-	}
-
-	// подсчет числа элементов до первого элемента равного x (вместо предиката равенства можно использовать более общий предикат-шаблон)
-	template <typename type> size_t count_until_not_equal(_in const type *x_array, _in const type &x) {
-		size_t count = 0;
-		while (x_array[count] != x)
-			count++;
-		return count;
+	// проверка числа value на вхождение в диапазон [range.first, range.second]
+	template <typename type_t> bool in_range(
+		arg_in const type_t &value,
+		arg_in const std::pair<type_t, type_t> &range
+	) {
+		return in_range<type_t>(value, range.first, range.second);
 	}
 
 #else
-
 	#define max(a, b) ((a) > (b) ? (a) : (b))
 	#define min(a, b) ((a) < (b) ? (a) : (b))
 	#define in_range(x, a, b) (((x) >= (a)) && ((x) <= (b)) ? 1 : 0)
+	#define in_range(x, range) in_range(x, range.first, range.second)
 
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*template <typename type_t>
+struct range_t
+{
+	type_t from, to;
+	bool is_in(const type_t &value)
+	{
+		return in_range(value, from, to);
+	}
+};*/
+
+// массив данных произвольного типа в C-стиле
+template <typename type_t> struct array_t
+{
+	type_t *data;
+	size_t size;
+
+	//explicit array_t(const type_t *data, size_t size) : data(data), size(size) {}
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// обмен значени€ми двух переменных произвольного типа - нет альтернативы дл€ €зыка C
+template <typename type_t> void exchange(
+	arg_in arg_out type_t &a, 
+	arg_in arg_out type_t &b
+) {
+	type_t buf = a;
+	a = b;
+	b = buf;
+}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// сравнение двух объектов, вывод -1, если (a < b), 1, если (a > b), 0 если (a = b)
+template <typename type_t> char compare(
+	arg_in const type_t &a, 
+	arg_in const type_t &b
+) {
+	if (a < b)
+		return -1;
+	if (a > b)
+		return 1;
+	return 0;
+}
+
+// возвращает знак числа: -1 дл€ отриц., 1 дл€ положит. и 0 дл€ нул€
+template <typename type_t> char sign(
+	arg_in const type_t &x
+) {
+	return compare<type_t>(x, static_cast<const type_t&>(0))
+}
+
+// подсчет числа элементов до первого элемента равного x (вместо предиката равенства можно использовать более общий предикат-шаблон)
+template <typename type_t> size_t count_until_not_equal(
+	arg_in const type_t *x_array, 
+	arg_in const type_t &x
+) {
+	size_t count = 0;
+	while (x_array[count] != x)
+		count++;
+	return count;
+}
 
 
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool is_null(
+	arg_in const void *p
+) {
+	return nullptr == p;
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // сортировка элементов массива
-/*template <typename type> void sort_asc(in_out type *data, in uint32 count) {   // по возрастанию
+/*template <typename type> void sort_asc(in_out type *data, arg_in uint32 count) {   // по возрастанию
 	if (count > 1)
 		for (uint32 i = 0; i < count - 1; i++)
 			for (uint32 j = i; j < count; j++)
 				if (data[i] > data[j])
 					exchange<type>(data[i], data[j]);
 }
-template <typename type> void sort_desc(in_out type *data, in uint32 count) {   // по убыванию
+template <typename type> void sort_desc(in_out type *data, arg_in uint32 count) {   // по убыванию
 	if (count > 1)
 		for (uint32 i = 0; i < count - 1; i++)
 			for (uint32 j = i; j < count; j++)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+
 #include "u_scard_wrapper.h"
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -11,46 +12,41 @@ typedef unsigned char byte_t;
 #define MIFARE_ULTRALIGHT__BYTES_PER_PAGE	 4
 #define MIFARE_ULTRALIGHT__SIZE_IN_BYTES	(MIFARE_ULTRALIGHT__PAGE_COUNT * MIFARE_ULTRALIGHT__BYTES_PER_PAGE)
 
-#define MIFARE_ULTRALIGHT__SERIAL_NUMBER_SIZE_IN_BYTES		7
+#define MIFARE_ULTRALIGHT__SERIAL_NUMBER__SIZE_IN_BYTES		7
 #define MIFARE_ULTRALIGHT__MAX_BYTES_READ_ONCE			   16
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// типы карт mifare ultralight (x pages by 4 bytes):
+// ultralight - 16 pages
+// ultralight_ev1 - 20 and 41 pages
+enum class cardtype_e { unknown = 0, ultralight = 16, ultralight_ev1_20p = 20, ultralight_ev1_41p = 41 };
+
+cardtype_e get_cardtype(size_t pagecount);
+
+template <typename type_t>
+struct array_t
+{
+	const type_t *data;
+	size_t size;
+
+	array_t(const type_t *data = nullptr, size_t size = 0) : data(data), size(size) {}
+	
+	//const type_t* begin() { return data; }
+	//const type_t* end() { return data + size; }
+
+	//const type_t* cbegin() const { return data; }
+	//const type_t* cend() const { return data + size; }
+};
+
 namespace apdu
 {
-	typedef std::vector<byte_t> content_t;
+	typedef std::vector<byte_t> buffer_t;
+	//typedef unsigned int status_t;
 
-	class apdu_t
+	struct packet_t
 	{
-	protected:
-		inline virtual ULONG get_size() const = 0;
-	};
-
-	class send_t : protected apdu_t
-	{
-	public:
-		send_t(_In_ byte_t cls, _In_ byte_t ins);
-		inline ULONG get_size() const;
-
-		struct
-		{
-			byte_t cls, ins;
-			byte_t p[3];
-		} packet;
-
-	private:		
-	};
-
-	class receive_t : protected apdu_t
-	{
-	public:
-		receive_t();
-		bool is_ok() const;
-		inline ULONG get_size() const;
-
-		content_t packet;
-
-	private:		
-		const byte_t* get_sw() const noexcept;
+		buffer_t send, recieve;
+		static bool is_sw_ok(const byte_t sw[2]);
 	};
 
 	namespace error
@@ -65,45 +61,83 @@ namespace apdu
 			void output_message(_In_ const wchar_t *message) const;
 		};
 
-		class sw_t : public error_t
+		class sw_t 
+			: public error_t
 		{
 		public:
-			sw_t(_In_ const wchar_t *function, _In_ const byte_t sw[2]);
-		private:
+			sw_t(
+				_In_ const wchar_t *function, 
+				_In_ const byte_t sw[2]
+			);
 		};
 
-		class out_of_range_t : public error_t
+		class out_of_range_t 
+			: public error_t
 		{
 		public:
-			out_of_range_t(_In_ const wchar_t *function, _In_ size_t value, _In_ size_t upper_bound);
-		private:
+			out_of_range_t(
+				_In_ const wchar_t *function, 
+				_In_ size_t value, 
+				_In_ const size_t bounds[2]
+			);
+			out_of_range_t(
+				_In_ const wchar_t *function,
+				_In_ size_t value,
+				_In_ size_t expected_value
+			);
+		};
+
+		class bytes_count_not_equal_buffer_size_t 
+			: public error_t
+		{
+		public:
+			bytes_count_not_equal_buffer_size_t(
+				_In_ const wchar_t *function,
+				_In_ size_t buffer_size,
+				_In_ size_t bytes_count
+			);
 		};
 	}
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-class APDU
-{
-protected:
-	APDU(_In_ const CSmartcardManager &SmartcardManager);
-	const CSmartcardManager &m_SmartcardManager;
-};
-
-class APDU_ReadData : public APDU
+class APDU_Manager
 {
 public:
-	APDU_ReadData(_In_ const CSmartcardManager &SmartcardManager);
+	APDU_Manager(_In_ const CSmartcardManager &SmartcardManager);
 
-	ULONG Execute(_In_ byte_t Page, _In_ byte_t BytesToRead) noexcept;
-	const apdu::content_t* GetData() const noexcept;
+	array_t<byte_t> Read_BinaryBlock(_In_ size_t Page, _In_ size_t BytesToRead) const;
+	array_t<byte_t> GetVersion() const;
 
 private:
-	byte_t GetBytesToRead(_In_ byte_t Page, _In_ byte_t BytesToRead) const;
+	size_t GetBytesToRead(_In_ size_t Page, _In_ size_t BytesToRead) const;
 
-	apdu::send_t	m_send;
-	apdu::receive_t	m_receive;
+	const CSmartcardManager &m_SmartcardManager;
+	mutable apdu::packet_t m_packet;
 };
 
+namespace mifare
+{
+	struct ultralight_t
+	{
+		struct header_t
+		{
+			byte_t sn_part_1[3];
+			byte_t bcc_part_1;
+			byte_t sn_part_2[4];
+			byte_t bcc_part_2;
+			byte_t internal;
+			byte_t lock[2];
+			union
+			{
+				byte_t as_byte[4];
+				unsigned __int32 as_uint32;
+			} otp;
+		} header;
+
+		byte_t data[48];
+	};
+};
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

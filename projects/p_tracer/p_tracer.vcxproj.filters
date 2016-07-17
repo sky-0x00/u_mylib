@@ -28,6 +28,15 @@
     <Filter Include="units\string">
       <UniqueIdentifier>{d8ce42d4-ba46-4da6-b173-2875694ed9ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="units\u_exception">
+      <UniqueIdentifier>{eef2a420-683f-492c-a5b1-a4a74fbffa54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="units\u_process">
+      <UniqueIdentifier>{5aefeebf-3014-40cf-8cdd-65d2c24d1ee5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="units\ui">
+      <UniqueIdentifier>{54ea7609-25be-4254-8989-e8b06df8a3d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -48,7 +57,19 @@
     <ClInclude Include="..\..\units\u_string.h">
       <Filter>units\string</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\units\u_tracer.h">
+    <ClInclude Include="..\..\units\u_exception.h">
+      <Filter>units\u_exception</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\u_process.h">
+      <Filter>units\u_process</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\ui\u_structs.h">
+      <Filter>units\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\winapi\u_types.h">
+      <Filter>units\winapi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\u_trace.h">
       <Filter>units\tracer</Filter>
     </ClInclude>
   </ItemGroup>
@@ -59,9 +80,6 @@
     <ClCompile Include="p_tracer.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\units\u_tracer.cpp">
-      <Filter>units\tracer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\units\winapi\u_winapi.cpp">
       <Filter>units\winapi</Filter>
     </ClCompile>
@@ -70,6 +88,18 @@
     </ClCompile>
     <ClCompile Include="..\..\units\u_string.cpp">
       <Filter>units\string</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\units\u_exception.cpp">
+      <Filter>units\u_exception</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\units\u_process.cpp">
+      <Filter>units\u_process</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\units\ui\u_structs.cpp">
+      <Filter>units\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\units\u_trace.cpp">
+      <Filter>units\tracer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

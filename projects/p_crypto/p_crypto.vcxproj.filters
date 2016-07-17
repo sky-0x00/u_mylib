@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Файлы исходного кода">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Заголовочные файлы">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="u_crypto">
+      <UniqueIdentifier>{79638e98-c2a7-4dbe-ad00-7d47e52eb9a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="u_crypto\crc">
+      <UniqueIdentifier>{57283a4e-fe77-4c87-83ac-f4b3b6442dbb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="u_string">
+      <UniqueIdentifier>{3f840248-3974-4b3b-b2c6-67bfee4bfe52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="u_system">
+      <UniqueIdentifier>{c58e52e9-e763-4012-ba6c-d693c2c8ddbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="u_convert">
+      <UniqueIdentifier>{1bfaaa05-af8f-43f9-9d91-5ac1d82b68e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="u_exception">
+      <UniqueIdentifier>{2e1866d2-3f00-4813-a529-c7748926650e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="winapi">
+      <UniqueIdentifier>{89103c55-4aac-49f2-b42f-d565f61c2737}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\crypto\crc\u_md5.h">
+      <Filter>u_crypto\crc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\u_string.h">
+      <Filter>u_string</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\u_system.h">
+      <Filter>u_system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\u_convert.h">
+      <Filter>u_convert</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\u_exception.h">
+      <Filter>u_exception</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\winapi\u_types.h">
+      <Filter>winapi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\units\winapi\u_winapi.h">
+      <Filter>winapi</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="p_crypto.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\units\crypto\crc\u_md5.cpp">
+      <Filter>u_crypto\crc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\units\u_string.cpp">
+      <Filter>u_string</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\units\u_convert.cpp">
+      <Filter>u_convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\units\u_exception.cpp">
+      <Filter>u_exception</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\units\winapi\u_winapi.cpp">
+      <Filter>winapi</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
