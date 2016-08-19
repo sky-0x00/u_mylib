@@ -98,7 +98,7 @@ string::string(
 /*static*/ bool string::is_empty(
 	arg_in cstr_t str
 ) {
-	return *str == string::character::null();
+	return *str == character::special::null();
 }
 
 void string::reverse()
@@ -123,13 +123,23 @@ string& string::operator=(
 	return *this;
 }
 
-constexpr /*static*/ char_t string::character::null()
+/*static*/ constexpr char_t character::special::null()
 {
 	return L'\0';
+}
+/*static*/ constexpr char_t character::special::newline()
+{
+	return L'\n';
 }
 
 /*static*/ cstr_t string::special::empty()
 {
-	static const auto ch_null = string::character::null();
-	return &ch_null;
+	static const char_t char_null = character::special::null();
+	return &char_null;
+}
+
+/*static*/ cstr_t string::special::newline()
+{
+	static const char_t chars_newline[] = { character::special::newline(), character::special::null() };
+	return chars_newline;
 }

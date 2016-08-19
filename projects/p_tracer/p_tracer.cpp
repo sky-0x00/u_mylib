@@ -79,6 +79,9 @@ int prn(char_t *s, size_t count, const char_t *format, ...)
 
 int main()
 {
+	std::wofstream s;
+	s << L"sdasda";
+
 	string str0(L"1234");
 	//string str0(L"1");
 	str0.reverse();
@@ -95,12 +98,16 @@ int main()
 
 	tracer::config config;
 
-	config.initial_buffer_size = 0;
 	config.targets.debug = true;
 	config.targets.file = L"c:\\fout.txt";
+	//config.format.session_id = false;
+	//config.format.date = false;
+	//config.format.ids = tracer::config::format::ids::dec;
 
 	tracer tracer(L"my_module", config);
+	tracer.trace(trace::category::normal, L"");
 	tracer.trace(trace::category::normal, L"i: %i", 0x11223344);
+	tracer.trace(trace::category::error, L"i: 0x%08X", 0x11223344);
 
 
 	//ui::point_t point1;

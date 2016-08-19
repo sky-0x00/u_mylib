@@ -8,14 +8,10 @@
 #include "winapi\u_winapi.h"
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
-//
-// настраиваемые параметры
-//
-
 // приращение размера буфера, если текуший размер недостаточен
 #define BUFFER_INC_SIZE					32
 
-//
+// ошибка...
 #define BUFFER_CALC_LENGTH_ERROR		L"ошибка вычисления размера буфера трассировки"
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -26,88 +22,118 @@
 };
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
-char_t *p_data;
-
 tracer::tracer(
-	cstr_t module_name, 
-	const config &config
+	arg_in cstr_t module_name, 
+	arg_in const config &config
 ) : 
-	m_name(module_name), 
-	m_format(config.format),
-	m_buffer(module_name, config.initial_buffer_size)
+	m__buffer(module_name, config.format)
 {
-	m_target_debug = config.targets.debug;
+	m__target_debug = config.targets.debug;
 	if (string::check(config.targets.file))
-	{
-		m_fstream.open(config.targets.file, std::ios_base::out | std::ios_base::app);
-		if (m_fstream.is_open())
-		{
-			;// out_to_buffer(m_buffer.data(), L"1");
-		}
-		else
-			;//WinApi::Native::OutputDebugString(buffer_data);
-	}
+		m__target_file.open(config.targets.file, std::ios_base::out | std::ios_base::app);
+	
+	trace_begin();
 }
 
 tracer::~tracer()
 {
-	if (m_fstream.is_open())
-		m_fstream.close();
+	trace_end();
 }
 
-bool tracer::is_target__debug() const
+bool tracer::is_target__debug() const noexcept
 {
-	return m_target_debug;
+	return m__target_debug;
 }
 bool tracer::is_target__file() const
 {
-	return m_fstream.is_open() ? true : false;
+	return m__target_file.is_open();
 }
 bool tracer::is_trace_needed() const
 {
 	return is_target__debug() || is_target__file();
 }
 
-void tracer::out_buffer_to__debug() const
+void tracer::out_buffer_to__debug()
 {
-	//static std::mutex mutex;
-	//std::lock_guard
+	if (!is_target__debug())
+		return;
+
+	WinApi::Native::OutputDebugString(m__buffer.c_str());
+	WinApi::Native::OutputDebugString(string::special::newline());
+}
+void tracer::out_buffer_to__file()
+{
+	if (!is_target__file())
+		return;
+
+	m__target_file << m__buffer.c_str() << string::special::newline();
+}
+
+void tracer::trace_begin()
+{
+	if (!is_trace_needed())
+		return;
+
+	std::lock_guard<std::mutex> mutex_locker(m__mutex);
+	m__buffer.output_string(
+		trace::category::normal, 
+		L"--------------------------------------------------------------------------------------<<--"
+	);
+
+	out_buffer_to__debug();
+	out_buffer_to__file();
+}
+void tracer::trace_end()
+{
+	if (!is_trace_needed())
+		return;
+
+	std::lock_guard<std::mutex> mutex_locker(m__mutex);
+	m__buffer.output_string(
+		trace::category::normal, 
+		L"-------------------------------------------------------------------------------------->>--"
+	);
+
+	out_buffer_to__debug();
+	m__buffer.append_string(string::special::newline());
+	out_buffer_to__file();
 }
 
 size_t tracer::trace(
-	trace::category category,
-	const char_t *format,
-	...
-	) {
-	if (!string::check(format) || !is_trace_needed())
+	arg_in trace::category category,
+	arg_in cstr_t format,
+	arg_in ...
+) {
+	if (!is_trace_needed())
 		return 0;
 
 	va_list args;
 	va_start(args, format);
-	{
-		std::lock_guard<std::mutex> lock(m_buffer.get_mutex());
-		m_buffer.create_prefix(m_format);
-		m_buffer.append_string(category, format, args);
-	}
-	va_end(args);
-	//WinApi::Native::OutputDebugString(m_buffer.get_string());
+	
+	std::lock_guard<std::mutex> mutex_locker(m__mutex);
+	m__buffer.output_string(category, format, args);
 
-	return m_buffer.get_length();
+	out_buffer_to__debug();
+	out_buffer_to__file();
+	
+	va_end(args);
+	
+	return m__buffer.length();
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 void tracer::buffer::output(
-	const char_t *format, 
-	va_list args
-){
-	// rest - остаточный буфер, он лежит в диапазоне [m_data.data(); m_data.data() + m_data.size())
-	// число символов в остаточном буфере rest равно rest_size
+	arg_in cstr_t format,
+	arg_in va_list args
+) {
+	const size_t length = this->length();
 
-	const size_t length = get_length();
-	const size_t rest_size = m_data.size() - length;
+	// m__data_rest - остаточный буфер, он лежит в диапазоне [m__data.data(); m__data.data() + m__data.size())
+	// число символов в остаточном буфере m__data_rest равно rest_size	
+	const size_t rest_size = m__data.size() - length;			// с учетом символа '\0'
 
-	// выводим форматированную строку в буфер p_data
-	auto count = vswprintf(p_data, rest_size, format, args);
+	// выводим форматированную строку в буфер m__data_rest
+	auto count = vswprintf(m__data_rest, rest_size, format, args);
 	if (-1 == count)
 	{
 		// размер буфера в rest_size недостаточен, переустановим его
@@ -117,18 +143,18 @@ void tracer::buffer::output(
 	}
 	if (count >= rest_size)
 	{
-		m_data.resize(++count + length);
-		p_data = m_data.data() + length;
-		count = vswprintf(p_data, count, format, args);
+		m__data.resize(++count + length);
+		m__data_rest = m__data.data() + length;
+		count = vswprintf(m__data_rest, count, format, args);
 		if (-1 == count)
 			throw BUFFER_CALC_LENGTH_ERROR;
 	}
-	p_data += count;
+	m__data_rest += count;
 }
 
 void tracer::buffer::output(
-	const char_t *format, 
-	...
+	arg_in cstr_t format,
+	arg_in ...
 ) {
 	va_list args;
 	va_start(args, format);
@@ -137,240 +163,132 @@ void tracer::buffer::output(
 }
 
 tracer::buffer::buffer(
-	arg_in const string &module_name,
-	arg_in size_t initial_size
+	arg_in cstr_t module_name,
+	arg_in const struct config::format &format
 ) :
-	m_module_name(module_name),
-	m_data(initial_size),								// 32 << 4 = 512 байт
-	m_newdata_ptr(m_data.data())
+	m__module_name(module_name),
+	m__data(get_initial_size()),
+	m__data_rest(m__data.data()),
+	m__format(format)
 {}
 
 void tracer::buffer::create_prefix(
-	const struct tracer::config::format &format
+	arg_in trace::category category
 ) {
-	p_data = m_data.data();
+	m__data_rest = m__data.data();
 
 	SYSTEMTIME Time;
 	WinApi::Native::GetLocalTime(&Time);
 	
 	// выводим отметку времени
-	if (format.date)
+	if (m__format.date)
 	{
 		// "YYYY-MM-DD "
 		output(L"%04u-%02u-%02u ", Time.wYear, Time.wMonth, Time.wDay);
 	}
 	output(L"%02u:%02u:%02u", Time.wHour, Time.wMinute, Time.wSecond);
-	if (format.time_msecs)
+	if (m__format.time_msecs)
 	{
 		// ".MSMS"
 		output(L".%03u", Time.wMilliseconds);
 	}
 	
 	// выводим имя модуля
-	output(L" [%s]", m_module_name);
+	output(L" [%s]", m__module_name.c_str());
 
-	// выводим информацию о сессии, процессе, потоке
-	if (format.session_id)
+	// формируем информацию о сессии
+	char_t SessionId_String[16] = L"";
+	if (m__format.session_id)
 	{
 		const auto SessionId = WinApi::Session::Current::Id();
 		if (SessionId == WinApi::Session::Id::Unknown)
-			output(L" [?]");
+			wcscpy_s(SessionId_String, L"? ");
 		else
-			switch (format.ids)
+			switch (m__format.ids)
 			{
 			case config::format::ids::dec:
-				output(L" [%u]", SessionId);
+				swprintf_s(SessionId_String, L"%u ", SessionId);
 				break;
 			case config::format::ids::hex:
-				output(L" [0x%X]", SessionId);
+				swprintf_s(SessionId_String, L"0x%X ", SessionId);
 				break;
 			}
 	}
 
-	switch (format.ids)
+	// выводим информацию о сессии + идентификаторы [процесса:потока]
+	switch (m__format.ids)
 	{
 	case config::format::ids::dec:
-		output(L" [%u:%u]", WinApi::Process::Current::Id(), WinApi::Thread::Current::Id());
+		output(L" [%s%u:%u]", SessionId_String, WinApi::Process::Current::Id(), WinApi::Thread::Current::Id());
 		break;
 	case config::format::ids::hex:
-		output(L" [0x%X:0x%X]", WinApi::Process::Current::Id(), WinApi::Thread::Current::Id());
+		output(L" [%s0x%04X:0x%04X]", SessionId_String, WinApi::Process::Current::Id(), WinApi::Thread::Current::Id());
 		break;
 	}
+
+	// выводим символы начала (приглашение на вывод)
+	output(L" %s", category_prefixes.at(category));
 }
 
 void tracer::buffer::append_string(
-	trace::category category, 
-	const char_t *format, 
-	va_list args
+	arg_in cstr_t format,
+	arg_in va_list args
 ) {
-	//out(L" ", category_prefixes.at(category), format, args, L"\n");
-	
-	static std::vector<char_t> format_str;
-	auto &category_str = category_prefixes.at(category);
-	
-	//const auto size = 3 +string::length(category_str) + string::length(format);
-	const auto size = 3;
-
-	format_str.resize(size);
-	swprintf_s(format_str.data(), size, L" %s%s\n", category_str, format);			// assert(size-1)	
-	output(format_str.data(), args);
+	// выводим переданную user'ом трассировочную строку
+	output(format, args);
 }
 
-std::mutex& tracer::buffer::get_mutex() noexcept
+void tracer::buffer::append_string(
+	arg_in cstr_t format, 
+	arg_in ...
+) {
+	va_list args;
+	va_start(args, format);
+	append_string(format, args);
+	va_end(args);
+}
+
+void tracer::buffer::output_string(
+	arg_in trace::category category,
+	arg_in cstr_t format, 
+	arg_in va_list args
+) {
+	create_prefix(category);
+	append_string(format, args);
+}
+
+void tracer::buffer::output_string(
+	arg_in trace::category category,
+	arg_in cstr_t format,
+	arg_in ...
+) {
+	va_list args;
+	va_start(args, format);
+	output_string(category, format, args);
+	va_end(args);
+}
+
+size_t tracer::buffer::length() const noexcept
 {
-	return m_mutex;
+	//assert(m__data.size())
+	//assert(m__data_rest >= m__data.data())
+	//assert(m__data_rest < m__data.data() + m__data.size())
+
+	return m__data_rest - m__data.data();
+}
+cstr_t tracer::buffer::c_str() const noexcept
+{
+	return m__data.data();
+}
+const std::vector<char_t>& tracer::buffer::data() const noexcept
+{
+	return m__data;
 }
 
-size_t tracer::buffer::get_length() const noexcept
+/*static*/ constexpr size_t tracer::buffer::get_initial_size() noexcept
 {
-	return p_data - m_data.data();
+	return BUFFER_INC_SIZE << 4;
 }
-const char_t* tracer::buffer::get_data() const noexcept
-{
-	return m_data.data();
-}
-
-//#include <windows.h>
-//#include <assert.h>
-//#include <mutex>
-//#include "winapi\u_winapi.h"
-//
-//tracer_t::tracer_t(const config_t &config):
-//	info(config.info), buffer(config.get_buffer_size())
-//{
-//	initialize(config);
-//}
-//
-//void tracer_t::initialize(const tracer_t::config_t &config)
-//{
-//	trace_to.debug_output = config.trace_to.debug_output;
-//	
-//	if (!config.trace_to.file_name)
-//		return;
-//
-//	trace_to.file_stream.open(config.trace_to.file_name, std::ios_base::out | std::ios_base::app);
-//}
-//tracer_t::~tracer_t()
-//{
-//	if (trace_to.file_stream.is_open())
-//		trace_to.file_stream.close();
-//}
-//
-//size_t tracer_t::create_prefix(wchar_t *buffer_data, size_t buffer_size)
-//{
-//	auto prefix_time = [](wchar_t *buffer_data, size_t buffer_size, const trace::info_t &info)
-//	{
-//		register size_t result = 0;
-//		SYSTEMTIME Time;
-//		WinApi::Native::GetLocalTime(&Time);
-//
-//		if (info.date)
-//		{
-//			// "YYYY-MM-DD "
-//			result += swprintf_s(buffer_data + result, buffer_size - result, L"%04u-%02u-%02uT", Time.wYear, Time.wMonth, Time.wDay);
-//		}
-//		// "HH:MM:SS"
-//		result += swprintf_s(buffer_data + result, buffer_size - result, L"%02u:%02u:%02u", Time.wHour, Time.wMinute, Time.wSecond);
-//		if (info.time_msecs)
-//		{
-//			// ".MSMS"
-//			result += swprintf_s(buffer_data + result, buffer_size - result, L".%03u", Time.wMilliseconds);
-//		}
-//		return result;
-//	};
-//	auto prefix_id = [](wchar_t *buffer_data, size_t buffer_size, ULONG id, const trace::info_t &info)
-//	{
-//		register size_t result = 0;
-//		wchar_t id_s[6];
-//
-//		assert(0 != id);
-//
-//		// пока при конвертации используем crt - через _itow_s()
-//		switch (info.id_format)
-//		{
-//		case trace::info_t::id_format_t::hex:
-//			assert(0 == _itow_s(id, id_s, 16));
-//			result += swprintf_s(buffer_data + result, buffer_size - result, L"0x%s", id_s);
-//			break;
-//		case trace::info_t::id_format_t::dec:
-//			assert(0 == _itow_s(id, id_s, 10));
-//			result += swprintf_s(buffer_data + result, buffer_size - result, L"%s", id_s);
-//			break;
-//		case trace::info_t::id_format_t::hex_dec:
-//			assert(0 == _itow_s(id, id_s, 16));
-//			result += swprintf_s(buffer_data + result, buffer_size - result, L"0x%s", id_s);
-//			assert(0 == _itow_s(id, id_s, 10));
-//			result += swprintf_s(buffer_data + result, buffer_size - result, L"(%s)", id_s);
-//			break;
-//		}
-//
-//		return result;
-//	};
-//
-//	register size_t result = prefix_time(buffer_data, buffer_size, info);
-//	result += swprintf_s(buffer_data + result, buffer_size - result, L"%c[", trace::separator);
-//	
-//	result += prefix_id(buffer_data + result, buffer_size - result, WinApi::Process::Current::GetID(), info);
-//	result += swprintf_s(buffer_data + result, buffer_size - result, L":");
-//	result += prefix_id(buffer_data + result, buffer_size - result, WinApi::Thread::Current::GetID(), info);
-//	result += swprintf_s(buffer_data + result, buffer_size - result, L"]%c", trace::separator);	
-//
-//	return result;
-//}
-//
-//size_t tracer_t::trace(trace::category category, const wchar_t* format, ...)
-//{
-//	if (!is_trace_needed())
-//		return 0;
-//
-//	const size_t buffer_size = buffer.size();
-//	wchar_t *const buffer_data = buffer.data();
-//
-//	static std::mutex mutex;
-//	std::lock_guard<std::mutex> locker(mutex);
-//
-//	register size_t result = create_prefix(buffer_data, buffer_size);
-//
-//	switch (category)
-//	{
-//	case trace::category::normal:
-//		break;
-//	case trace::category::error:
-//		result += swprintf_s(buffer_data + result, buffer_size - result, L"ERROR> ");
-//		break;
-//	}
-//
-//	va_list args;
-//	va_start(args, format);
-//	result += _vswprintf_p(buffer_data + result, buffer_size - result, format, args);
-//	va_end(args);
-//
-//	result += swprintf_s(buffer_data + result, buffer_size - result, L"\n");
-//
-//	if (trace_to.debug_output)
-//		WinApi::Native::OutputDebugString(buffer_data);
-//	if (trace_to.file_stream.is_open())
-//		trace_to.file_stream << buffer_data;
-//
-//	return result;
-//}
-//
-//inline bool tracer_t::is_trace_needed()
-//{
-//	return trace_to.debug_output || trace_to.file_stream.is_open();
-//}
-//
-//tracer_t::config_t::config_t(size_t buffer_size) :
-//	buffer_size(buffer_size), 
-//	trace_to{ nullptr, false } {}
-//
-//size_t tracer_t::config_t::get_buffer_size() const
-//{
-//	return buffer_size;
-//}
-//
-//trace::info_t::info_t() :
-//	date(true), time_msecs(true), id_format(trace::info_t::id_format_t::hex) {}
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 tracer::config::targets::targets() noexcept :
@@ -383,10 +301,6 @@ tracer::config::format::format() noexcept :
 	time_msecs(true),
 	session_id(true),
 	ids(ids::hex)
-{}
-
-tracer::config::config() noexcept :
-	initial_buffer_size(BUFFER_INC_SIZE << 4)			// 32 << 4 = 512 байт
 {}
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------

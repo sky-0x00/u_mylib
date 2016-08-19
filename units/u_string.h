@@ -1,6 +1,7 @@
 #pragma once
 
 #include "u_system.h"
+
 #include <string>
 #include <list>
 #include <vector>
@@ -40,7 +41,16 @@ typedef const char_t *cstr_t;
 //	void reverse(const char_array_t &char_array);
 //}
 
+struct character
+{
+	struct special
+	{
+		constexpr static char_t null();			// '\0'
+		constexpr static char_t newline();		// '\n'
 
+	};	// struct special
+
+};	// struct character
 
 class string :
 	public std::wstring
@@ -51,8 +61,12 @@ public:
 
 	enum class case_type { lower, upper };
 
-	struct character;
-	struct special;
+	struct special
+	{
+		static cstr_t empty();					// ""
+		static cstr_t newline();				// "\n"
+
+	};	// struct special
 
 	string();
 	string(arg_in cstr_t str);								// из c-строки (c '\0' на конце)
@@ -71,14 +85,5 @@ public:
 	static bool is_empty(arg_in cstr_t str);
 
 private:
-};
 
-struct string::character
-{
-	constexpr static char_t null();
-};
-
-struct string::special
-{
-	static cstr_t empty();
-};
+};	// class string

@@ -1,10 +1,9 @@
 #pragma once
 
-#include <vector>
+//#include <vector>
 #include <fstream>
 #include <mutex>
 #include <map>
-//#include "..\units\u_system.h"
 #include "..\units\u_string.h"
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,64 +52,80 @@ public:
 		
 		};	// struct targets
 
-		size_t initial_buffer_size;				// первоначальный размер буфера трассировщика
 		format format;							// формат выводимых данных
 		targets targets;						// куда выводим данные трассировки
 
-		config() noexcept;
-	
 	};	// struct config
 
-	// буффер трассировщика, мьютекс лочится снаружи
-	static class buffer
+	// буффер трассировщика
+	class buffer
 	{
 	public:
-		void create_prefix(arg_in const struct config::format &format);
-		void append_string(arg_in trace::category category, arg_in cstr_t format, arg_in va_list args);
+		// длина буфера в символах (без учета символа L'\0')
+		size_t length() const noexcept;
 
-		// длина заполненной части буфера в символах (без учета символа L'\0')
-		size_t get_length() const noexcept;
+		buffer(arg_in cstr_t module_name, arg_in const struct config::format &format);
+		
+		cstr_t c_str() const noexcept;
+		const std::vector<char_t>& data() const noexcept;
 
-		std::mutex& get_mutex() noexcept;
-		cstr_t get_data() const noexcept;
+		void output_string(arg_in trace::category category, arg_in cstr_t format, arg_in ...);
+		void output_string(arg_in trace::category category, arg_in cstr_t format, arg_in va_list args);
 
-		buffer(const string &module_name, size_t initial_size);
+		void append_string(arg_in cstr_t format, arg_in ...);
+		void append_string(arg_in cstr_t format, arg_in va_list args);
 
-	private:
-		void output(cstr_t format, ...);
-		void output(cstr_t format, va_list args);
+	private /*функции-члены*/:
+		void create_prefix(arg_in trace::category category);
 
+		void output(arg_in cstr_t format, arg_in ...);
+		void output(arg_in cstr_t format, arg_in va_list args);
+
+	private /*данные*/:
 		// внутренний буфер, первоначальный размер задается в конструкторе ч/з initial_size
-		std::vector<char_t> m_data;
+		std::vector<char_t> m__data;
 		// указатель на данные внутреннего буфера (хвост), куда будут помещаться новые символы
-		str_t m_newdata_ptr;
+		str_t m__data_rest;
 
-		// мютекс для мультипоточного доступа к разделяемым данным извне
-		std::mutex m_mutex;
+		// формат выводимых в буфер данных
+		const struct config::format m__format;
 
-		// указатель на имя модуля, хранимое в классе tracer
-		const string &m_module_name;
+		// указатель на имя модуля
+		const string m__module_name;
 
+	private /*статичные функции*/:
+		static constexpr size_t get_initial_size() noexcept;
+
+	private /*статичные данные*/:
 		static const std::map<trace::category, cstr_t> &category_prefixes;
 	
 	};	// static class buffer
 	
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------
-	tracer(cstr_t module_name, const config &config);
+	tracer(arg_in cstr_t module_name, arg_in const config &config);
 	~tracer();
 
-	// геттеры для получения таргетов в OutputDebugString и именованный файл
-	bool is_target__debug() const;
-	bool is_target__file() const;
-
-	bool is_trace_needed() const;
-
-	//~tracer();
 	//size_t trace(trace::category category, const wchar_t* format, ...);
 
-	size_t trace(trace::category category, cstr_t format, ...);
+	size_t trace(arg_in trace::category category, arg_in cstr_t format, arg_in ...);
+	
+private /*функции-члены*/ :
 
-private:
+	// признаки активности таргетов вывода...
+	bool is_target__debug() const noexcept;		// в OutputDebugString
+	bool is_target__file() const;				// в именованный файл
+
+	// определяет, нужна ли трассировка вообще
+	bool is_trace_needed() const;
+
+	// вывод содержимого буфера в таргетты (если они активны)
+	void out_buffer_to__debug();				// в OutputDebugString
+	void out_buffer_to__file();					// в именованный файл
+
+	void trace_begin();
+	void trace_end();
+
+private /*данные*/:
 	//void initialize(const config_t &config);
 
 	//size_t create_prefix(wchar_t *buffer_data, size_t buffer_size);
@@ -126,20 +141,12 @@ private:
 	//trace::info_t info;
 	//inline bool is_trace_needed();
 
-	// имя модуля
-	const string m_name;
-
-	// таргетты вывода
-	bool m_target_debug;
-	std::wofstream m_fstream;
+	// таргетты вывода (устанавливаются в конструкторе)
+	bool m__target_debug;
+	std::wofstream m__target_file;
 	
 	// буфер для вывода
-	buffer m_buffer;
-
-	struct config::format m_format;
-
-	void out_buffer_to__debug() const;
-
-	size_t buffer__create_prefix();
-	size_t buffer__append_string(const char_t *format, ...);
+	buffer m__buffer;
+	// мютекс для мультипоточного доступа к разделяемым данным буфера
+	std::mutex m__mutex;
 };
