@@ -94,7 +94,6 @@ WinApi::Session::Id WinApi::Session::Current::Id(Process::Id Id)
 	if (Native::ProcessIdToSessionId(Id, &Result))
 		return Result;
 
-	// trace error
 	return WinApi::Session::Id::Unknown;
 }
 

@@ -4,6 +4,8 @@
 #include <sstream>
 #include <iomanip>
 #include <windows.h>
+#include <assert.h>
+#include <chrono>
 
 #define SW1_OK		0x90
 #define SW1_ERROR	0x63
@@ -230,5 +232,140 @@ array_t<byte_t> APDU_Manager::GetVersion() const
 
 	return result;
 }
+
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void mifare_ultralight::format::human::get( 
+	IN const std::vector< byte_t > &dump_raw
+) {
+	auto data_raw = reinterpret_cast< const format::raw * >( dump_raw.data() );
+
+	// заполняем данными в порядке следования полей в билете
+	get_uid( data_raw->uid_begin );
+
+	bcc[0] = data_raw->bcc_0;
+	bcc[1] = data_raw->bcc_1;
+	assert( check_bcc() );
+
+	lock = _byteswap_ushort( data_raw->lock );
+	otp = _byteswap_ulong( data_raw->otp );
+
+	get_serial( reinterpret_cast< cdata_t >( &data_raw->serial_begin ) );
+
+	assert( data_raw->date_validto_0 == data_raw->date_validto_1 );
+	assert( data_raw->time_validto_0 == data_raw->time_validto_1 );
+	init_and_decode_tm( tm_validto, &data_raw->date_validto_0, &data_raw->time_validto_0 );
+	init_and_decode_tm( tm_dateofsale, &data_raw->date_ofsale, nullptr );
+	validity = data_raw->validity;
+	counter = data_raw->counter;
+	wicket_no = data_raw->wicket_no;
+	hash = data_raw->hash;
+	init_and_decode_tm( tm_lastuse, &data_raw->date_of_lastuse, &data_raw->time_of_lastuse );
+}
+
+/*static*/ void mifare_ultralight::format::human::get_uid( 
+	IN cdata_t uid_begin, 
+	OUT byte_t (&uid)[ MIFARE_ULTRALIGHT__SERIAL_NUMBER__SIZE_IN_BYTES ] 
+) {
+	uid[0] = uid_begin[0];
+	uid[1] = uid_begin[1];
+	uid[2] = uid_begin[2];
+	uid[3] = uid_begin[4];
+	uid[4] = uid_begin[5];
+	uid[5] = uid_begin[6];
+	uid[6] = uid_begin[7];
+}
+
+void mifare_ultralight::format::human::get_uid( 
+	IN cdata_t uid_begin
+) {
+	get_uid( uid_begin, uid );
+}
+
+bool mifare_ultralight::format::human::check_bcc( 
+) const 
+{
+	byte_t bcc_calc[2];
+	bcc_calc[0] = 0x88 ^ uid[0] ^ uid[1] ^ uid[2];
+	bcc_calc[1] = uid[3] ^ uid[4] ^ uid[5] ^ uid[6];
+	return (bcc[0] == bcc_calc[0]) && (bcc[1] == bcc_calc[1]);
+}
+
+void mifare_ultralight::format::human::get_serial( 
+	IN cdata_t serial_begin
+) {
+	const auto p_value = reinterpret_cast< const uint32_t * >( serial_begin );
+	serial = ( _byteswap_ulong( p_value[0] ) & 0xFFF) << 0x14;
+	serial |= ( _byteswap_ulong( p_value[1] ) >> 0xC) & 0xFFFFF;
+}
+
+namespace std
+{
+	namespace chrono
+	{
+		typedef duration< uint32_t, ratio_multiply< ratio<24>, hours::period> > days;				// расширим std::chrono типом duration длинною в день
+	}
+}
+
+/*static*/ void mifare_ultralight::format::human::decode_date( 
+	IN uint16_t encoded, 
+	OUT std::tm &decoded 
+) {
+	// дата представлена как число дней, прошедших с 1992-01-01 (среда)
+	
+	auto get_epoch = []() -> time_t
+	{
+		std::tm tm_epoch = { 
+			0,			// tm_sec
+			0,			// tm_min
+			0,			// tm_hour
+			0,			// tm_mday [1..31]	// ?
+			0,			// tm_mon [0..11]
+			92,			// tm_year [since 1900]
+			3,			// tm_wday - days since Sunday - [0..6]
+			0,			// tm_yday - days since January 1 - [0..365]
+			0			// tm_isdst - daylight savings time flag
+		};
+
+		//const auto s = asctime( &tm_epoch );
+
+		const auto result = std::mktime( &tm_epoch );
+		assert( -1 != result );
+		return result;
+	};
+	
+	static const auto tp_epoch = std::chrono::steady_clock::from_time_t( get_epoch() );							// epoch
+	const auto t_new = std::chrono::steady_clock::to_time_t( tp_epoch + std::chrono::days( encoded ) );			// epoch + encoded
+	decoded = *std::localtime( &t_new );
+
+	//const auto t_new = get_epoch();	
+	//decoded = *std::localtime( &t_new );
+
+	const auto s = asctime( &decoded );
+}
+
+/*static*/ void mifare_ultralight::format::human::decode_time( 
+	IN uint16_t encoded, 
+	OUT std::tm &decoded 
+) {
+	// 0x6728 = 26408 = 26408/32 = 825 минут от 00:00
+	const double mins = encoded / 32.0;	
+	const auto mins_rounded = static_cast< uint16_t >( mins );
+
+	decoded.tm_hour = mins_rounded / 60;
+	decoded.tm_min = mins_rounded % 60;
+	decoded.tm_sec = static_cast< int >( 60 * (mins - mins_rounded) );
+}
+
+/*static*/ void mifare_ultralight::format::human::init_and_decode_tm( 
+	OUT std::tm &decoded,
+	IN const uint16_t *encoded_date, 
+	IN const uint16_t *encoded_time
+) {
+	decoded = {};
+	if (encoded_date)
+		decode_date( _byteswap_ushort( *encoded_date ), decoded );
+	if (encoded_time)
+		decode_time( _byteswap_ushort( *encoded_time ), decoded );
+}
+
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

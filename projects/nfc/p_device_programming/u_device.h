@@ -1,8 +1,6 @@
 #pragma once
 #include <string>
 
-typedef std::wstring string_t;
-
 #include "u_scard_wrapper.h"
 #include "u_mifare_ultralight.h"
 
@@ -23,7 +21,7 @@ namespace smartcard
 		
 		//void dump(_Out_ byte_t buffer[MIFARE_ULTRALIGHT__SIZE_IN_BYTES]) const;
 		//bool dump(_Out_ byte_t *p_buffer, _In_ size_t buffer_size) const;
-		size_t dump(_Out_ std::vector<byte_t> &buffer) const noexcept;
+		size_t dump(_Out_ std::vector<byte_t> &buffer) const _NOEXCEPT;
 
 		//void dump(_In_ const wchar_t *file_name) const;
 

@@ -83,7 +83,7 @@ array_t<byte_t> smartcard::device_t::read_data(
 
 size_t smartcard::device_t::dump(
 	_Out_ std::vector<byte_t> &buffer
-) const noexcept
+) const _NOEXCEPT
 {
 	buffer.clear();
 	size_t pagecount = 0;
@@ -220,9 +220,9 @@ void smartcard::device_t::save_to_file(
 	_In_ const std::vector<byte_t> &buffer
 ) const
 {
-	std::ofstream f_out(file_name, std::wofstream::binary);
-	f_out.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
-	f_out.close();
+	std::ofstream f_out( file_name, std::wofstream::binary );
+	f_out.write( reinterpret_cast<const char*>( buffer.data() ), buffer.size() );
+	//f_out.close();
 }
 
 array_t<byte_t> smartcard::device_t::get_version() const

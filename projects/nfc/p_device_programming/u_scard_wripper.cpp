@@ -41,11 +41,11 @@ CSmartcardContext::~CSmartcardContext()
 	}
 }
 
-LONG CSmartcardContext::Establish() noexcept
+LONG CSmartcardContext::Establish() _NOEXCEPT
 {
 	return ::SCardEstablishContext(SCARD_SCOPE_USER, nullptr, nullptr, &m_Context);
 }
-LONG CSmartcardContext::Release() noexcept
+LONG CSmartcardContext::Release() _NOEXCEPT
 {
 	auto error = ::SCardReleaseContext(m_Context);
 	if (SCARD_S_SUCCESS == error)
@@ -185,7 +185,7 @@ LONG CSmartcardManager::Connect(
 	_In_ PCWSTR pszDeviceName,
 	_In_ ULONG ShareMode,
 	_In_ ULONG Protocols_Preferred
-) noexcept
+) _NOEXCEPT
 {
 	if (m_hCard)
 		Disconnect(SCARD_RESET_CARD);
@@ -198,7 +198,7 @@ LONG CSmartcardManager::Connect(
 }
 LONG CSmartcardManager::Disconnect(
 	_In_ ULONG Disposition
-) noexcept
+) _NOEXCEPT
 {
 	auto error = ::SCardDisconnect(m_hCard, Disposition);
 	if (SCARD_S_SUCCESS == error)
@@ -208,11 +208,11 @@ LONG CSmartcardManager::Disconnect(
 	return error;
 }
 
-inline SCARDHANDLE CSmartcardManager::GetCard() const noexcept
+inline SCARDHANDLE CSmartcardManager::GetCard() const _NOEXCEPT
 {
 	return m_hCard;
 }
-/*inline*/ ULONG CSmartcardManager::GetProtocol() const noexcept
+/*inline*/ ULONG CSmartcardManager::GetProtocol() const _NOEXCEPT
 {
 	return m_Protocol_Active;
 }
@@ -260,7 +260,7 @@ LONG CSmartcardManager::Transmit(
 	_Inout_opt_ LPSCARD_IO_REQUEST  pioRecvPci,
 	_Out_       LPBYTE              pbRecvBuffer,
 	_Inout_     LPDWORD             pcbRecvLength
-) const noexcept 
+) const _NOEXCEPT 
 {
 	auto error = ::SCardTransmit(m_hCard, pioSendPci, pbSendBuffer, cbSendLength, pioRecvPci, pbRecvBuffer, pcbRecvLength);
 	if (SCARD_S_SUCCESS != error)

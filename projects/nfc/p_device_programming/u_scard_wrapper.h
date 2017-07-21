@@ -17,8 +17,8 @@ public:
 	operator const SCARDCONTEXT() const;
 
 protected:
-	LONG Establish() noexcept;
-	LONG Release() noexcept;
+	LONG Establish() _NOEXCEPT;
+	LONG Release() _NOEXCEPT;
 
 private:
 	SCARDCONTEXT m_Context;
@@ -50,8 +50,8 @@ public:
 	CSmartcardManager(_In_ const CSmartcardContext &SmartcardContext);
 	~CSmartcardManager();
 
-	inline SCARDHANDLE GetCard() const noexcept;
-	/*inline*/ ULONG GetProtocol() const noexcept;
+	inline SCARDHANDLE GetCard() const _NOEXCEPT;
+	/*inline*/ ULONG GetProtocol() const _NOEXCEPT;
 
 	string_list_t EnumDevices() const;
 
@@ -60,11 +60,11 @@ public:
 		_In_ PCWSTR pszDeviceName,
 		_In_ ULONG ShareMode,
 		_In_ ULONG Protocols_Preferred
-	) noexcept;
+	) _NOEXCEPT;
 
 	LONG Disconnect(
 		_In_ ULONG Disposition
-	) noexcept;
+	) _NOEXCEPT;
 
 	LONG Transmit(
 		_In_        LPCSCARD_IO_REQUEST pioSendPci,
@@ -73,7 +73,7 @@ public:
 		_Inout_opt_ LPSCARD_IO_REQUEST  pioRecvPci,
 		_Out_       LPBYTE              pbRecvBuffer,
 		_Inout_     LPDWORD             pcbRecvLength
-	) const noexcept;
+	) const _NOEXCEPT;
 
 private:
 	SCARDHANDLE m_hCard;

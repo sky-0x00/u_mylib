@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <tchar.h>
 
-
-
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
+
+#define _in
+#define _out
+
+#include <string>
+typedef std::wstring string_t;
