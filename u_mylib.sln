@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p_tracer", "projects\p_tracer\p_tracer.vcxproj", "{116FE716-49C8-425D-B81E-6612AB13028B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p_crypto", "projects\p_crypto\p_crypto.vcxproj", "{9790B4F5-C914-4445-BA67-AB02E89C1B55}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p_network", "projects\p_network\p_network.vcxproj", "{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,8 +33,19 @@ Global
 		{9790B4F5-C914-4445-BA67-AB02E89C1B55}.Release|x64.Build.0 = Release|x64
 		{9790B4F5-C914-4445-BA67-AB02E89C1B55}.Release|x86.ActiveCfg = Release|Win32
 		{9790B4F5-C914-4445-BA67-AB02E89C1B55}.Release|x86.Build.0 = Release|Win32
+		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Debug|x64.ActiveCfg = Debug|x64
+		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Debug|x64.Build.0 = Debug|x64
+		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Debug|x86.ActiveCfg = Debug|Win32
+		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Debug|x86.Build.0 = Debug|Win32
+		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Release|x64.ActiveCfg = Release|x64
+		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Release|x64.Build.0 = Release|x64
+		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Release|x86.ActiveCfg = Release|Win32
+		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {33AE48F2-B6B0-4307-9BA5-C1124AC5E7BD}
 	EndGlobalSection
 EndGlobal

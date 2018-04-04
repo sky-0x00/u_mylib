@@ -39,3 +39,10 @@
 
 
 ./out
+/.vs/u_mylib/v15
+/Debug
+/out
+/projects/p_crypto/Debug
+/projects/p_network/Debug
+/projects/p_network/x64/Debug
+/x64/Debug
