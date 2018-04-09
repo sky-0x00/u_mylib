@@ -1,7 +1,10 @@
 #pragma once
 
-#define EN__UNSUPPORTED_PLATFORM	L"Unsupported platform"
-#define RU__UNSUPPORTED_PLATFORM	L"Неподдерживаемая платформа"
+#define PLATFORM_UNSUPPORTED__EN	L"Unsupported platform"
+#define PLATFORM_UNSUPPORTED__RU	L"Неподдерживаемая платформа"
+
+// пока так
+#define PLATFORM_UNSUPPORTED		PLATFORM_UNSUPPORTED__EN
 
 struct platform
 {

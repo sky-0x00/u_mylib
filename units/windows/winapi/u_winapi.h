@@ -25,4 +25,8 @@ namespace Winapi
 	
 	Error GetLastError() noexcept;
 	void SetLastError( _in Error Error ) noexcept;
+
+	int WSAStartup( _in WORD VersionRequested, _out _option LPWSADATA pWSAData = nullptr ) noexcept;
+	int WSACleanup() noexcept;
+	int WSAGetLastError() noexcept;
 }

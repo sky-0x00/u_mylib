@@ -7,9 +7,10 @@
 
 namespace network
 {
-	namespace address
+	struct address
 	{
-		namespace protocol
+	//public:
+		struct protocol
 		{
 			class ip_v4
 			{
@@ -40,9 +41,17 @@ namespace network
 			{};
 
 			typedef ip_v4 ip;
-		}
+		};
 
 		typedef uint16_t port;
 		typedef protocol::ip host;
-	}
+
+	//public:
+	//private:
+
+		host m_host;
+		port m_port;
+
+		string to_string( _in bool is_output_port = true ) const;
+	};
 }

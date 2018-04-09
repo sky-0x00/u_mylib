@@ -3,15 +3,13 @@
 #include "u_address.h"
 #include "..\..\u_assert.h"
 
-using namespace network::address;
-
-void protocol::ip_v4::set(
+void network::address::protocol::ip_v4::set(
 	_in const octets &ip
 ) {
 	m_data = ip;
 }
 
-byte_t& protocol::ip_v4::octet(
+byte_t& network::address::protocol::ip_v4::octet(
 	_in unsigned index
 ) {
 	assert( index < std::tuple_size<octets>::value );
@@ -32,31 +30,31 @@ byte_t& protocol::ip_v4::octet(
 //	m_data[index] = value;
 //}
 
-protocol::ip_v4::ip_v4( 
+network::address::protocol::ip_v4::ip_v4(
 	_in const octets &ip /*= { 0, 0, 0, 0 } */
 ) {
 	set(ip);
 }
-protocol::ip_v4::ip_v4(
+network::address::protocol::ip_v4::ip_v4(
 	_in const ip_v4 &ip
 ) {
 	set( ip.m_data );
 }
 
-protocol::ip_v4& protocol::ip_v4::operator =( 
+network::address::protocol::ip_v4& network::address::protocol::ip_v4::operator =(
 	_in const octets &ip 
 ) {
 	set(ip);
 	return *this;
 }
-protocol::ip_v4& protocol::ip_v4::operator =( 
+network::address::protocol::ip_v4& network::address::protocol::ip_v4::operator =(
 	_in const ip_v4 &ip 
 ) {
 	set(ip.m_data);
 	return *this;
 }
 
-string protocol::ip_v4::to_string(
+string network::address::protocol::ip_v4::to_string(
 ) const
 {
 	auto octet_to_string = [](
@@ -76,6 +74,23 @@ string protocol::ip_v4::to_string(
 	{
 		result.push_back( L'.' );
 		result += octet_to_string( m_data.at(i++), buffer );
+	}
+	return result;
+}
+
+string network::address::to_string(
+	_in bool is_output_port /*= true*/
+) const
+{
+	string result( m_host.to_string() );
+	if ( is_output_port )
+	{
+		char_t buffer[6];
+		const auto error = _ultow_s( m_port, buffer, 10 );				// TODO: убрать зависимость от ucrt
+		assert( 0 == error );
+
+		result.push_back( L':' );
+		result += buffer;
 	}
 	return result;
 }

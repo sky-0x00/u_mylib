@@ -17,5 +17,5 @@ void assert_dynamic(
 	}
 
 	// неподдерживаемая платформа
-	throw EN__UNSUPPORTED_PLATFORM;
+	throw PLATFORM_UNSUPPORTED;
 }

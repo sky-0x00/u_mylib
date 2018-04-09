@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\units\windows\winapi\u_winapi.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\units\network\u_network.h">
+      <Filter>units</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -70,6 +73,9 @@
     </ClCompile>
     <ClCompile Include="..\..\units\u_string.cpp">
       <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\units\network\u_network.cpp">
+      <Filter>units</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

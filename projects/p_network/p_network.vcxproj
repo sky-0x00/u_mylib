@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\units\network\address\u_address.h" />
+    <ClInclude Include="..\..\units\network\u_network.h" />
     <ClInclude Include="..\..\units\u_assert.h" />
     <ClInclude Include="..\..\units\u_macros.h" />
     <ClInclude Include="..\..\units\u_platform.h" />
@@ -159,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\units\network\address\u_address.cpp" />
+    <ClCompile Include="..\..\units\network\u_network.cpp" />
     <ClCompile Include="..\..\units\u_assert.cpp" />
     <ClCompile Include="..\..\units\u_platform.cpp" />
     <ClCompile Include="..\..\units\u_string.cpp" />
