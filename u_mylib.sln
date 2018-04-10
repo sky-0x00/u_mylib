@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p_crypto", "projects\p_cryp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p_network", "projects\p_network\p_network.vcxproj", "{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p_nfc", "projects\p_nfc\p_nfc.vcxproj", "{3CA12E1A-B882-4985-BFC7-3835FCCFEBA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Release|x64.Build.0 = Release|x64
 		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Release|x86.ActiveCfg = Release|Win32
 		{F951E4E4-7AB1-4C10-A76E-F9B2A512E49E}.Release|x86.Build.0 = Release|Win32
+		{3CA12E1A-B882-4985-BFC7-3835FCCFEBA9}.Debug|x64.ActiveCfg = Debug|x64
+		{3CA12E1A-B882-4985-BFC7-3835FCCFEBA9}.Debug|x64.Build.0 = Debug|x64
+		{3CA12E1A-B882-4985-BFC7-3835FCCFEBA9}.Debug|x86.ActiveCfg = Debug|Win32
+		{3CA12E1A-B882-4985-BFC7-3835FCCFEBA9}.Debug|x86.Build.0 = Debug|Win32
+		{3CA12E1A-B882-4985-BFC7-3835FCCFEBA9}.Release|x64.ActiveCfg = Release|x64
+		{3CA12E1A-B882-4985-BFC7-3835FCCFEBA9}.Release|x64.Build.0 = Release|x64
+		{3CA12E1A-B882-4985-BFC7-3835FCCFEBA9}.Release|x86.ActiveCfg = Release|Win32
+		{3CA12E1A-B882-4985-BFC7-3835FCCFEBA9}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -43,8 +43,8 @@ network::win32::library::error::operator int(
 network::win32::library::library( 
 	_in const version &version /*= { 2, 2 }*/
 ) {
-	const auto Result = startup( version );
-	assert( 0 == Result );
+	const auto result = startup( version );
+	assert( 0 == result, result );
 }
 network::win32::library::~library(
 ) {

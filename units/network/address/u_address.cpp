@@ -12,7 +12,7 @@ void network::address::protocol::ip_v4::set(
 byte_t& network::address::protocol::ip_v4::octet(
 	_in unsigned index
 ) {
-	assert( index < std::tuple_size<octets>::value );
+	assert( index < std::tuple_size<octets>::value, ERROR_INVALID_INDEX );
 	return m_data[index];
 }
 //byte_t protocol::ip_v4::get_octet( 
@@ -63,7 +63,7 @@ string network::address::protocol::ip_v4::to_string(
 	) -> cstr_t
 	{
 		const auto error = _ultow_s( octet, buffer, 10 );				// TODO: убрать зависимость от ucrt
-		assert( 0 == error );
+		assert( 0 == error, ERROR_BAD_FORMAT );
 		return buffer;
 	};
 
@@ -87,7 +87,7 @@ string network::address::to_string(
 	{
 		char_t buffer[6];
 		const auto error = _ultow_s( m_port, buffer, 10 );				// TODO: убрать зависимость от ucrt
-		assert( 0 == error );
+		assert( 0 == error, ERROR_BAD_FORMAT );
 
 		result.push_back( L':' );
 		result += buffer;

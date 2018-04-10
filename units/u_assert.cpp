@@ -5,17 +5,18 @@
 #include "windows\winapi\u_winapi.h"
 
 void assert_dynamic(
-	_in bool expr
+	_in bool expr,
+	_in Winapi::Error error /*= Winapi::GetLastError()*/
 ) {
 	if (expr)
 		return;
 
-	if ( platform::is_windows() )
-	{
+	//if ( platform::is_windows() )
+	//{
 		// trace что-либо...
-		throw Winapi::Error::AssertionFailure;
-	}
+		throw error;
+	//}
 
 	// неподдерживаемая платформа
-	throw PLATFORM_UNSUPPORTED;
+	//throw PLATFORM_UNSUPPORTED;
 }
